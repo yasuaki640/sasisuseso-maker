@@ -50,10 +50,6 @@ resource "aws_ecs_service" "main" {
   }
 }
 
-import {
-  id = "arn:aws:ecs:ap-northeast-1:839063654285:task-definition/sasisuseso-maker-taskdef:1"
-  to = aws_ecs_task_definition.main
-}
 resource "aws_ecs_task_definition" "main" {
   family                   = "sasisuseso-maker-taskdef"
   network_mode             = "awsvpc"
@@ -61,7 +57,7 @@ resource "aws_ecs_task_definition" "main" {
   cpu                      = "1024"
   memory                   = "3072"
   execution_role_arn       = "arn:aws:iam::839063654285:role/ecsTaskExecutionRole"
-
+  skip_destroy             = false
   container_definitions = jsonencode([
     {
       name  = "app"
@@ -98,7 +94,7 @@ resource "aws_ecs_task_definition" "main" {
   ])
 
   runtime_platform {
-    cpu_architecture        = "ARM64"
+    cpu_architecture        = "X86_64"
     operating_system_family = "LINUX"
   }
 }
