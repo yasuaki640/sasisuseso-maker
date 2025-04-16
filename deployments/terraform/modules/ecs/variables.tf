@@ -3,3 +3,8 @@ variable "name" {
   type        = string
   default     = ""
 }
+
+variable "container_image" {
+  description = "The container image to use for the application"
+  type        = string
+}
