@@ -41,6 +41,27 @@ resource "aws_ecs_task_definition" "api" {
   ])
 }
 
+resource "aws_ecs_service" "api" {
+  name            = "${var.name}-api-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.api.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.subnets
+    security_groups  = var.security_groups
+    assign_public_ip = true
+  }
+
+  # load_balancer {
+  #   target_group_arn = var.target_group_arn
+  #   container_name   = "${var.name}-api-container"
+  #   container_port   = 8080
+  # }
+  depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
+}
+
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.name}-ecsTaskExecutionRole"
 
