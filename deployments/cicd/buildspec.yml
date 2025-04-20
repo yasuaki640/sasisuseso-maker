@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     AWS_REGION: "ap-northeast-1"
-    ECR_REPOSITORY: "sasisuseso-maker/app"
+    ECR_REPOSITORY: "sasisuseso-maker/api"
 
 phases:
   pre_build:
@@ -19,7 +19,7 @@ phases:
       - echo Building the Docker image...
       - docker build -t $ECR_REPOSITORY_URI:latest -f ./build/package/docker/Dockerfile --target deploy .
       - docker tag $ECR_REPOSITORY_URI:latest $ECR_REPOSITORY_URI:$IMAGE_TAG
-  
+
   post_build:
     commands:
       - echo Build completed on `date`

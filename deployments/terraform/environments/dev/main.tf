@@ -7,10 +7,23 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "ap-northeast-1"
+}
+
+locals {
+  name_prefix = "sasisuseso-maker-dev"
+  tags = {
+    Environment = "dev"
+    Project     = "sasisuseso-maker"
+  }
+}
+
 module "ecr" {
   source = "../../modules/ecr"
   name   = "sasisuseso-maker/api"
 }
+
 
 module "vpc" {
   source = "../../modules/vpc"
@@ -73,3 +86,45 @@ module "ecs" {
     Project     = "sasisuseso-maker"
   }
 }
+
+module "codepipeline" {
+  source = "../../modules/codepipeline"
+
+  name_prefix           = local.name_prefix
+  artifacts_bucket_name = "${local.name_prefix}-artifacts"
+  aws_account_id        = var.aws_account_id
+  ecr_repository_name   = module.ecr.repository_name
+  ecr_repository_arn    = module.ecr.repository_arn
+  buildspec_path        = "deployments/cicd/buildspec.yml"
+
+
+  codestar_connection_arn = var.codestar_connection_arn
+  repository_id           = "yasuaki640/sasisuseso-maker"
+  branch_name             = "main"
+
+  tags = local.tags
+}
+
+# module "codebuild" {
+#   source = "../../modules/codebuild"
+#
+#   name_prefix           = local.name_prefix
+#   artifacts_bucket_name = "${local.name_prefix}-codebuild-artifacts"
+#   aws_account_id        = var.aws_account_id
+#   ecr_repository_name   = module.ecr.repository_name
+#   ecr_repository_arn    = module.ecr.repository_arn
+#   buildspec_path        = "deployments/cicd/buildspec.yml"
+#   repository_id         = "yasuaki640/sasisuseso-maker"
+#   branch_name           = "main"
+#
+#   tags = local.tags
+# }
+
+
+# Note: CodeDeploy for ECS requires a load balancer and target groups
+# The current ECS module doesn't have a load balancer configured
+# To implement CodeDeploy, you would need to:
+# 1. Add a load balancer module
+# 2. Configure target groups
+# 3. Update the ECS service to use the load balancer
+# 4. Then add the CodeDeploy module
