@@ -87,16 +87,24 @@ module "ecs" {
   }
 }
 
+module "codebuild" {
+  source = "../../modules/codebuild"
+
+  name_prefix         = local.name_prefix
+  aws_account_id      = var.aws_account_id
+  ecr_repository_name = module.ecr.repository_name
+  buildspec_path      = "deployments/cicd/buildspec.yml"
+
+  tags = local.tags
+}
+
 module "codepipeline" {
   source = "../../modules/codepipeline"
 
   name_prefix           = local.name_prefix
   artifacts_bucket_name = "${local.name_prefix}-artifacts"
-  aws_account_id        = var.aws_account_id
-  ecr_repository_name   = module.ecr.repository_name
   ecr_repository_arn    = module.ecr.repository_arn
-  buildspec_path        = "deployments/cicd/buildspec.yml"
-
+  codebuild_project_name = module.codebuild.codebuild_project_name
 
   codestar_connection_arn = var.codestar_connection_arn
   repository_id           = "yasuaki640/sasisuseso-maker"
@@ -104,22 +112,6 @@ module "codepipeline" {
 
   tags = local.tags
 }
-
-# module "codebuild" {
-#   source = "../../modules/codebuild"
-#
-#   name_prefix           = local.name_prefix
-#   artifacts_bucket_name = "${local.name_prefix}-codebuild-artifacts"
-#   aws_account_id        = var.aws_account_id
-#   ecr_repository_name   = module.ecr.repository_name
-#   ecr_repository_arn    = module.ecr.repository_arn
-#   buildspec_path        = "deployments/cicd/buildspec.yml"
-#   repository_id         = "yasuaki640/sasisuseso-maker"
-#   branch_name           = "main"
-#
-#   tags = local.tags
-# }
-
 
 # Note: CodeDeploy for ECS requires a load balancer and target groups
 # The current ECS module doesn't have a load balancer configured

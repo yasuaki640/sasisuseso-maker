@@ -8,22 +8,6 @@ variable "artifacts_bucket_name" {
   type        = string
 }
 
-variable "aws_account_id" {
-  description = "AWS Account ID"
-  type        = string
-}
-
-variable "ecr_repository_name" {
-  description = "Name of the ECR repository"
-  type        = string
-}
-
-variable "buildspec_path" {
-  description = "Path to the buildspec file"
-  type        = string
-  default     = "deployments/cicd/buildspec.yml"
-}
-
 variable "codestar_connection_arn" {
   description = "ARN of the CodeStar connection to GitHub"
   type        = string
@@ -48,5 +32,10 @@ variable "tags" {
 
 variable "ecr_repository_arn" {
   description = "ARN of the ECR repository"
+  type        = string
+}
+
+variable "codebuild_project_name" {
+  description = "Name of the CodeBuild project"
   type        = string
 }

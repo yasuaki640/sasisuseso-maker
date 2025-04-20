@@ -1,10 +1,3 @@
-# CodeBuild module for building and pushing Docker images to ECR
-
-resource "aws_s3_bucket" "codebuild_bucket" {
-  bucket        = var.artifacts_bucket_name
-  force_destroy = true
-}
-
 resource "aws_iam_role" "codebuild_role" {
   name = "${var.name_prefix}-codebuild-role"
 
@@ -44,11 +37,8 @@ resource "aws_iam_role_policy" "codebuild_policy" {
           "s3:GetObjectVersion",
           "s3:PutObject"
         ]
-        Effect = "Allow"
-        Resource = [
-          aws_s3_bucket.codebuild_bucket.arn,
-          "${aws_s3_bucket.codebuild_bucket.arn}/*"
-        ]
+        Effect   = "Allow"
+        Resource = var.artifacts_bucket_arn != "" ? [var.artifacts_bucket_arn, "${var.artifacts_bucket_arn}/*"] : ["*"]
       },
       {
         Action = [
@@ -74,12 +64,12 @@ resource "aws_iam_role_policy" "codebuild_policy" {
 
 resource "aws_codebuild_project" "api_build" {
   name          = "${var.name_prefix}-build"
-  description   = "Build project for ${var.name_prefix} API Docker image"
+  description   = "Build project for ${var.name_prefix}"
   service_role  = aws_iam_role.codebuild_role.arn
   build_timeout = "10"
 
   artifacts {
-    type = "NO_ARTIFACTS"
+    type = "CODEPIPELINE"
   }
 
   environment {
@@ -100,23 +90,8 @@ resource "aws_codebuild_project" "api_build" {
   }
 
   source {
-    type            = "GITHUB"
-    location        = "https://github.com/${var.repository_id}.git"
-    git_clone_depth = 1
-    buildspec       = var.buildspec_path
-
-    git_submodules_config {
-      fetch_submodules = true
-    }
-  }
-
-  source_version = var.branch_name
-
-  logs_config {
-    cloudwatch_logs {
-      group_name  = "/aws/codebuild/${var.name_prefix}-build"
-      stream_name = "build-log"
-    }
+    type      = "CODEPIPELINE"
+    buildspec = var.buildspec_path
   }
 
   tags = var.tags
