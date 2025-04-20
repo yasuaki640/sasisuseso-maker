@@ -1,69 +1,17 @@
 resource "aws_ecs_cluster" "main" {
-  name = "${var.name}-cluster"
+  name = "${var.name_prefix}-cluster"
 
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
-}
 
-resource "aws_ecs_task_definition" "api" {
-  family                   = "${var.name}-api-task"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = 256
-  memory                   = 512
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "${var.name}-api-container"
-      image     = var.container_image
-      essential = true
-
-      portMappings = [
-        {
-          containerPort = 8080
-          hostPort      = 8080
-          protocol      = "tcp"
-        }
-      ]
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = "/ecs/${var.name}"
-          "awslogs-region"        = "ap-northeast-1"
-          "awslogs-stream-prefix" = "ecs"
-        }
-      }
-    }
-  ])
-}
-
-resource "aws_ecs_service" "api" {
-  name            = "${var.name}-api-service"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.api.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets          = var.subnets
-    security_groups  = var.security_groups
-    assign_public_ip = true
-  }
-
-  # load_balancer {
-  #   target_group_arn = var.target_group_arn
-  #   container_name   = "${var.name}-api-container"
-  #   container_port   = 8080
-  # }
-  depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
+  tags = var.tags
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name}-ecsTaskExecutionRole"
+  name = "${var.name_prefix}-ecsTaskExecutionRole"
+  tags = var.tags
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -82,4 +30,67 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_ecs_task_definition" "api" {
+  family                   = "${var.name_prefix}-api-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = var.cpu
+  memory                   = var.memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  tags                     = var.tags
+
+  container_definitions = jsonencode([
+    {
+      name      = "${var.name_prefix}-api-container"
+      image     = var.container_image
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.container_port
+          protocol      = "tcp"
+        }
+      ]
+
+      # Basic logging configuration - adjust as needed
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.name_prefix}"
+          "awslogs-region"        = data.aws_region.current.name # Assumes region is configured
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ])
+}
+
+data "aws_region" "current" {}
+
+resource "aws_ecs_service" "api" {
+  name            = "${var.name_prefix}-api-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.api.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
+  tags            = var.tags
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.app_sg_id]
+    assign_public_ip = true # Set to false if using a load balancer in public subnets
+  }
+
+  # Uncomment and configure if using a load balancer
+  # load_balancer {
+  #   target_group_arn = var.target_group_arn # Add target_group_arn variable
+  #   container_name   = "${var.name_prefix}-api-container"
+  #   container_port   = var.container_port
+  # }
+
+  # Ensure the task execution role policy is attached before creating the service
+  depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
 }

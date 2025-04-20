@@ -39,7 +39,7 @@ module "app_sg" {
       to_port     = 8080
       protocol    = "tcp"
       description = "Allow HTTP inbound traffic"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["0.0.0.0/0"] # FIXME: Consider restricting this in production
     }
   ]
 
@@ -47,7 +47,7 @@ module "app_sg" {
     {
       from_port   = 0
       to_port     = 0
-      protocol    = "-1" # All protocols
+      protocol    = "-1"
       description = "Allow all outbound traffic"
       cidr_blocks = ["0.0.0.0/0"]
     }
@@ -59,11 +59,17 @@ module "app_sg" {
   }
 }
 
-# module "ecs" {
-#   source          = "../../modules/ecs"
-#   name            = "sasisuseso-maker"
-#   container_image = "839063654285.dkr.ecr.ap-northeast-1.amazonaws.com/sasisuseso-maker/app:latest"
-#   subnets          = ["subnet-b3ae2498", "subnet-f98c71a3"]
-#   target_group_arn = ""
-#   security_groups = []
-# }
+module "ecs" {
+  source = "../../modules/ecs"
+
+  name_prefix        = "sasisuseso-maker-dev"
+  container_image    = module.ecr.repository_url
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
+  app_sg_id          = module.app_sg.id
+
+  tags = {
+    Environment = "dev"
+    Project     = "sasisuseso-maker"
+  }
+}
