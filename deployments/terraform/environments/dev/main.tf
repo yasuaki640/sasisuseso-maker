@@ -20,8 +20,9 @@ locals {
 }
 
 module "ecr" {
-  source = "../../modules/ecr"
-  name   = "sasisuseso-maker/api"
+  source       = "../../modules/ecr"
+  name         = "sasisuseso-maker/api"
+  force_delete = true
 }
 
 
@@ -102,9 +103,9 @@ module "codebuild" {
 module "codepipeline" {
   source = "../../modules/codepipeline"
 
-  name_prefix           = local.name_prefix
-  artifacts_bucket_name = "${local.name_prefix}-artifacts"
-  ecr_repository_arn    = module.ecr.repository_arn
+  name_prefix            = local.name_prefix
+  artifacts_bucket_name  = "${local.name_prefix}-artifacts"
+  ecr_repository_arn     = module.ecr.repository_arn
   codebuild_project_name = module.codebuild.codebuild_project_name
 
   codestar_connection_arn = var.codestar_connection_arn
