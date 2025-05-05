@@ -114,11 +114,3 @@ module "codepipeline" {
 
   tags = local.tags
 }
-
-# Note: CodeDeploy for ECS requires a load balancer and target groups
-# The current ECS module doesn't have a load balancer configured
-# To implement CodeDeploy, you would need to:
-# 1. Add a load balancer module
-# 2. Configure target groups
-# 3. Update the ECS service to use the load balancer
-# 4. Then add the CodeDeploy module
