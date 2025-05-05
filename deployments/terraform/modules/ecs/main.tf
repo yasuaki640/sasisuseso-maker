@@ -32,6 +32,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+data "aws_region" "current" {}
+
+resource "aws_cloudwatch_log_group" "api_logs" {
+  name = "/ecs/${var.name_prefix}"
+  tags = var.tags
+
+  retention_in_days = 3
+}
+
 resource "aws_ecs_task_definition" "api" {
   family                   = "${var.name_prefix}-api-task"
   requires_compatibilities = ["FARGATE"]
@@ -68,7 +77,6 @@ resource "aws_ecs_task_definition" "api" {
   ])
 }
 
-data "aws_region" "current" {}
 
 resource "aws_ecs_service" "api" {
   name            = "${var.name_prefix}-api-service"
