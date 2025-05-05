@@ -81,6 +81,7 @@ module "ecs" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
   app_sg_id          = module.app_sg.id
+  target_group_arn   = module.alb.blue_target_group_arn
   desired_count      = 1
 
   tags = {

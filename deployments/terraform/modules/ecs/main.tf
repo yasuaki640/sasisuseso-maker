@@ -92,12 +92,11 @@ resource "aws_ecs_service" "api" {
     assign_public_ip = true # Set to false if using a load balancer in public subnets
   }
 
-  # Uncomment and configure if using a load balancer
-  # load_balancer {
-  #   target_group_arn = var.target_group_arn # Add target_group_arn variable
-  #   container_name   = "${var.name_prefix}-api-container"
-  #   container_port   = var.container_port
-  # }
+  load_balancer {
+    target_group_arn = var.target_group_arn # Add target_group_arn variable
+    container_name   = "${var.name_prefix}-api-container"
+    container_port   = var.container_port
+  }
 
   # Ensure the task execution role policy is attached before creating the service
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]

@@ -23,6 +23,11 @@ variable "app_sg_id" {
   type        = string
 }
 
+variable "target_group_arn" {
+  description = "ARN of the target group for the ECS service"
+  type        = string
+}
+
 variable "container_port" {
   description = "Port the container listens on"
   type        = number
