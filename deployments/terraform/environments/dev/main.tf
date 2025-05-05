@@ -89,6 +89,55 @@ module "ecs" {
   }
 }
 
+module "alb_sg" {
+  source = "../../modules/security_group"
+
+  name        = "sasisuseso-maker-dev-alb-sg"
+  description = "Security group for the sasisuseso-maker alb"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 8080
+      protocol    = "tcp"
+      description = "Allow HTTP inbound traffic"
+      cidr_blocks = ["0.0.0.0/0"] # FIXME: Consider restricting this in production
+    }
+  ]
+
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "Allow all outbound traffic"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
+
+  tags = {
+    Environment = "dev"
+    Project     = "sasisuseso-maker"
+  }
+}
+
+module "alb" {
+  source = "../../modules/alb"
+
+  name_prefix        = "sasisuseso-maker-dev"
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.vpc.public_subnet_ids # ALBはパブリックサブネットに配置
+  security_group_ids = [module.alb_sg.id]
+  target_port        = 8080    # アプリケーションのポート
+  health_check_path  = "/ping" # アプリケーションのヘルスチェックパス
+
+  tags = {
+    Environment = "dev"
+    Project     = "sasisuseso-maker"
+  }
+}
+
 module "codebuild" {
   source = "../../modules/codebuild"
 
