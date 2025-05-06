@@ -114,9 +114,24 @@ resource "aws_codepipeline" "app_pipeline" {
 
       configuration = {
         ProjectName = var.codebuild_project_name
+        EnvironmentVariables = jsonencode([
+          {
+            name  = "CONTAINER_NAME"
+            value = var.ecs_container_name
+            type  = "PLAINTEXT"
+          },
+          {
+            name  = "CONTAINER_PORT" # CodeBuildでappspec.yamlを生成するために追加
+            value = var.ecs_container_port
+            type  = "PLAINTEXT"
+          }
+        ])
+
       }
     }
   }
+
+  // TODO: Add Deploy stage
 
   tags = var.tags
 }

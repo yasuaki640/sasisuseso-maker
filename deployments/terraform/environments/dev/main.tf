@@ -162,5 +162,8 @@ module "codepipeline" {
   repository_id           = "yasuaki640/sasisuseso-maker"
   branch_name             = "main"
 
+  ecs_container_name      = "${local.name_prefix}-api-container"
+  ecs_container_port      = 8080 # FIXME: 何らかの変数定義を使って使い回す
+
   tags = local.tags
 }

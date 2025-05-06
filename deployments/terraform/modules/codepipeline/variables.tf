@@ -39,3 +39,13 @@ variable "codebuild_project_name" {
   description = "Name of the CodeBuild project"
   type        = string
 }
+
+variable "ecs_container_name" {
+  description = "The name of the ECS container defined in the task definition"
+  type        = string
+}
+
+variable "ecs_container_port" {
+  description = "The container port from the ECS task definition, used for CodeDeploy AppSpec"
+  type        = number
+}
