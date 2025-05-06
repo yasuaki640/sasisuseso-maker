@@ -60,8 +60,8 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_eip" "nat" {
-  count = length(var.private_subnets) > 0 ? length(var.azs) : 0
-  domain   = "vpc"
+  count  = length(var.private_subnets) > 0 ? length(var.azs) : 0
+  domain = "vpc"
 
   tags = merge(
     {
