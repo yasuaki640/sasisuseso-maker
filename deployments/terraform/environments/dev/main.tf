@@ -47,13 +47,13 @@ module "app_sg" {
   description = "Security group for the sasisuseso-maker application"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_with_cidr_blocks = [
+  ingress_with_source_security_group_id = [
     {
-      from_port   = 80
-      to_port     = 8080
-      protocol    = "tcp"
-      description = "Allow HTTP inbound traffic"
-      cidr_blocks = ["0.0.0.0/0"] # FIXME: Consider restricting this in production
+      from_port                = 80
+      to_port                  = 8080
+      protocol                 = "tcp"
+      description              = "Allow inbound traffic from ALB"
+      source_security_group_id = module.alb_sg.id
     }
   ]
 

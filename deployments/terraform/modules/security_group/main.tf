@@ -14,6 +14,17 @@ resource "aws_security_group" "this" {
     }
   }
 
+  dynamic "ingress" {
+    for_each = var.ingress_with_source_security_group_id
+    content {
+      from_port                = ingress.value.from_port
+      to_port                  = ingress.value.to_port
+      protocol                 = ingress.value.protocol
+      description              = ingress.value.description
+      security_groups          = [ingress.value.source_security_group_id]
+    }
+  }
+
   dynamic "egress" {
     for_each = var.egress_with_cidr_blocks
     content {
@@ -32,4 +43,3 @@ resource "aws_security_group" "this" {
     var.tags
   )
 }
-    
