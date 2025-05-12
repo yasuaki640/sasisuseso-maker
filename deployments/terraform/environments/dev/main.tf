@@ -185,3 +185,12 @@ module "codepipeline" {
 
   tags = local.tags
 }
+
+module "secret_manager" {
+  source = "../../modules/secret_manager"
+
+  name          = "${local.name_prefix}-example-secret"
+  description   = "Example secret for sasisuseso-maker dev environment"
+  secret_string = var.secret_manager_secret_string
+  tags          = local.tags
+}
