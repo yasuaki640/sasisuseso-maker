@@ -65,6 +65,15 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         ]
         Effect   = "Allow"
         Resource = var.codestar_connection_arn
+      },
+      {
+        Action = [
+          "codedeploy:CreateDeployment",
+          "codedeploy:GetDeployment",
+          "codedeploy:GetDeploymentConfig"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
       }
     ]
   })
@@ -131,7 +140,23 @@ resource "aws_codepipeline" "app_pipeline" {
     }
   }
 
-  // TODO: Add Deploy stage
+  stage {
+    name = "Deploy"
+    action {
+      name            = "DeployToECS"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "CodeDeploy"
+      version         = "1"
+      input_artifacts = ["build_output"] # build_outputにはappspec.yamlとtaskdef.jsonが含まれる想定
+
+      configuration = {
+        ApplicationName     = var.codedeploy_app_name
+        DeploymentGroupName = var.codedeploy_deployment_group_name
+        // AppSpecTemplateArtifact and TaskDefinitionTemplateArtifact are derived from input_artifacts if not specified
+      }
+    }
+  }
 
   tags = var.tags
 }

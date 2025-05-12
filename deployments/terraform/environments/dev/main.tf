@@ -150,6 +150,21 @@ module "codebuild" {
   tags = local.tags
 }
 
+module "codedeploy" {
+  source = "../../modules/codedeploy"
+
+  app_name                = "${local.name_prefix}-app"
+  deployment_group_name   = "${local.name_prefix}-dg"
+  ecs_cluster_name        = module.ecs.cluster_name
+  ecs_service_name        = module.ecs.service_name
+  alb_listener_arn        = module.alb.listener_arn
+  blue_target_group_name  = module.alb.blue_target_group_name
+  green_target_group_name = module.alb.green_target_group_name
+
+  # tags は codedeploy モジュールには定義されていないためコメントアウト
+  # tags = local.tags
+}
+
 module "codepipeline" {
   source = "../../modules/codepipeline"
 
@@ -159,11 +174,14 @@ module "codepipeline" {
   codebuild_project_name = module.codebuild.codebuild_project_name
 
   codestar_connection_arn = var.codestar_connection_arn
-  repository_id           = "yasuaki640/sasisuseso-maker"
+  repository_id           = "yasuaki640/sasisuseso-maker" # ご自身の環境に合わせて修正してください
   branch_name             = "main"
 
-  ecs_container_name      = "${local.name_prefix}-api-container"
-  ecs_container_port      = 8080 # FIXME: 何らかの変数定義を使って使い回す
+  ecs_container_name = "${local.name_prefix}-api-container"
+  ecs_container_port = 8080 # module.ecs.container_port を参照するように変更も検討
+
+  codedeploy_app_name              = module.codedeploy.codedeploy_app_name
+  codedeploy_deployment_group_name = module.codedeploy.codedeploy_deployment_group_name
 
   tags = local.tags
 }

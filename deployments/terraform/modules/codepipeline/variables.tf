@@ -49,3 +49,13 @@ variable "ecs_container_port" {
   description = "The container port from the ECS task definition, used for CodeDeploy AppSpec"
   type        = number
 }
+
+variable "codedeploy_app_name" {
+  description = "The name of the CodeDeploy application"
+  type        = string
+}
+
+variable "codedeploy_deployment_group_name" {
+  description = "The name of the CodeDeploy deployment group"
+  type        = string
+}

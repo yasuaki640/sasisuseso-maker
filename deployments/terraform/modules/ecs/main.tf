@@ -86,6 +86,10 @@ resource "aws_ecs_service" "api" {
   launch_type     = "FARGATE"
   tags            = var.tags
 
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+
   network_configuration {
     subnets          = var.private_subnet_ids
     security_groups  = [var.app_sg_id]
