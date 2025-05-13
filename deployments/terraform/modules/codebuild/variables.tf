@@ -25,6 +25,11 @@ variable "buildspec_path" {
   default     = "deployments/cicd/buildspec.yml"
 }
 
+variable "secret_manager_arn" {
+  description = "ARN of the AWS Secrets Manager secret"
+  type        = string
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

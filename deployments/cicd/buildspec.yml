@@ -4,12 +4,16 @@ env:
   variables:
     AWS_REGION: "ap-northeast-1"
     ECR_REPOSITORY: "sasisuseso-maker/api"
-
+  secrets-manager:
+    DOCKERHUB_USERNAME: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_USERNAME"
+    DOCKERHUB_PASSWORD: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_PASSWORD"
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo Logging in to Docker Hub...
+      - echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
       - ECR_REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
       - IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION:-latest}
 
@@ -29,4 +33,4 @@ phases:
 
 cache:
   paths:
-    - '/root/.m2/**/*'
+    - "/root/.m2/**/*"

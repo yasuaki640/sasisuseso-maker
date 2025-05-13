@@ -8,8 +8,14 @@ variable "codestar_connection_arn" {
   type        = string
 }
 
-variable "secret_manager_secret_string" {
-  description = "The secret string for the Secret Manager"
+variable "dockerhub_username" {
+  description = "Docker Hub username"
+  type        = string
+  sensitive   = true
+}
+
+variable "dockerhub_password" {
+  description = "Docker Hub password"
   type        = string
   sensitive   = true
 }

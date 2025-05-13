@@ -57,6 +57,13 @@ resource "aws_iam_role_policy" "codebuild_policy" {
         ]
         Effect   = "Allow"
         Resource = "*"
+      },
+      {
+        Action = [
+          "secretmanager:GetSecretValue",
+        ]
+        Effect   = "Allow"
+        Resource = var.secret_manager_arn
       }
     ]
   })
@@ -86,6 +93,12 @@ resource "aws_codebuild_project" "api_build" {
     environment_variable {
       name  = "ECR_REPOSITORY"
       value = var.ecr_repository_name
+    }
+
+    environment_variable {
+      name  = "SECRET_MANAGER_ARN"
+      value = var.secret_manager_arn
+      type  = "SECRETS_MANAGER"
     }
   }
 

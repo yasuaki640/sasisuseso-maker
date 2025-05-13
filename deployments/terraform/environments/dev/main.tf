@@ -139,13 +139,26 @@ module "alb" {
   }
 }
 
+module "secret_manager" {
+  source = "../../modules/secret_manager"
+
+  name        = "${local.name_prefix}-example-secret"
+  description = "Example secret for sasisuseso-maker dev environment"
+  secret_string = jsonencode({
+    DOCKERHUB_USERNAME = var.dockerhub_username
+    DOCKERHUB_PASSWORD = var.dockerhub_password
+  })
+  tags = local.tags
+}
+
 module "codebuild" {
   source = "../../modules/codebuild"
 
-  name_prefix         = local.name_prefix
-  aws_account_id      = var.aws_account_id
-  ecr_repository_name = module.ecr.repository_name
-  buildspec_path      = "deployments/cicd/buildspec.yml"
+  name_prefix                      = local.name_prefix
+  aws_account_id                   = var.aws_account_id
+  ecr_repository_name              = module.ecr.repository_name
+  buildspec_path                   = "deployments/cicd/buildspec.yml"
+  secret_manager_arn               = module.secret_manager.secret_arn
 
   tags = local.tags
 }
@@ -186,11 +199,3 @@ module "codepipeline" {
   tags = local.tags
 }
 
-module "secret_manager" {
-  source = "../../modules/secret_manager"
-
-  name          = "${local.name_prefix}-example-secret"
-  description   = "Example secret for sasisuseso-maker dev environment"
-  secret_string = var.secret_manager_secret_string
-  tags          = local.tags
-}
