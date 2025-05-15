@@ -100,6 +100,11 @@ resource "aws_codebuild_project" "api_build" {
       value = var.secret_manager_arn
       type  = "SECRETS_MANAGER"
     }
+
+    environment_variable {
+      name  = "DOCKERHUB_CREDENTIALS_SECRET_ARN"
+      value = var.secret_manager_arn
+    }
   }
 
   source {

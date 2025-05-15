@@ -154,11 +154,11 @@ module "secret_manager" {
 module "codebuild" {
   source = "../../modules/codebuild"
 
-  name_prefix                      = local.name_prefix
-  aws_account_id                   = var.aws_account_id
-  ecr_repository_name              = module.ecr.repository_name
-  buildspec_path                   = "deployments/cicd/buildspec.yml"
-  secret_manager_arn               = module.secret_manager.secret_arn
+  name_prefix         = local.name_prefix
+  aws_account_id      = var.aws_account_id
+  ecr_repository_name = module.ecr.repository_name
+  buildspec_path      = "deployments/cicd/buildspec.yml"
+  secret_manager_arn  = module.secret_manager.secret_arn
 
   tags = local.tags
 }
