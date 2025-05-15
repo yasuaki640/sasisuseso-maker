@@ -60,7 +60,7 @@ resource "aws_iam_role_policy" "codebuild_policy" {
       },
       {
         Action = [
-          "secretmanager:GetSecretValue",
+          "secretsmanager:GetSecretValue"
         ]
         Effect   = "Allow"
         Resource = var.secret_manager_arn
