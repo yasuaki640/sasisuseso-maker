@@ -70,7 +70,8 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         Action = [
           "codedeploy:CreateDeployment",
           "codedeploy:GetDeployment",
-          "codedeploy:GetDeploymentConfig"
+          "codedeploy:GetDeploymentConfig",
+          "codedeploy:RegisterApplicationRevision"
         ]
         Effect   = "Allow"
         Resource = "*"
