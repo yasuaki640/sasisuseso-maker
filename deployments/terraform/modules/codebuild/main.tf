@@ -64,6 +64,13 @@ resource "aws_iam_role_policy" "codebuild_policy" {
         ]
         Effect   = "Allow"
         Resource = var.secret_manager_arn
+      },
+      {
+        Action = [
+          "ecs:DescribeTaskDefinition"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
       }
     ]
   })

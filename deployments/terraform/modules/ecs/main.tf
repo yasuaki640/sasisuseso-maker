@@ -104,4 +104,10 @@ resource "aws_ecs_service" "api" {
 
   # Ensure the task execution role policy is attached before creating the service
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role_policy]
+
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
+  }
 }
