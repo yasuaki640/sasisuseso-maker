@@ -39,7 +39,7 @@ phases:
       - echo "Describing latest task definition for family $TASK_FAMILY..."
       - LATEST_TASK_DEF_OUTPUT=$(aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --query 'taskDefinition' --region "$AWS_REGION") # AWS_REGION は CodeBuild によって通常設定されます
       - ACTUAL_TASK_DEFINITION_ARN=$(echo "$LATEST_TASK_DEF_OUTPUT" | jq -r '.taskDefinitionArn')
-      - echo "Using Task Definition ARN: $ACTUAL_TASK_DEFINITION_ARN"
+      - 'echo "Using Task Definition ARN: $ACTUAL_TASK_DEFINITION_ARN"'
 
       - 'echo "Updating $APP_SPEC_PATH with:"'
       # 動的に取得したARNを使用
