@@ -4,6 +4,13 @@ env:
   variables:
     AWS_REGION: "ap-northeast-1"
     ECR_REPOSITORY: "sasisuseso-maker/api"
+    # CONTAINER_NAME, CONTAINER_PORT, TASK_DEFINITION_ARN は CodeBuild プロジェクトの環境変数として設定される想定
+    # 例:
+    # CONTAINER_NAME: "sasisuseso-maker-api-container" (Terraform の var.name_prefix + "-api-container")
+    # CONTAINER_PORT: 80 (Terraform の var.container_port)
+    # TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-1:ACCOUNT_ID:task-definition/sasisuseso-maker-api-task:REVISION"
+    APP_SPEC_PATH: "deployments/cicd/appspec.yml" # リポジトリルートからの appspec.yml のパス
+    IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json" # リポジトリルートからの imageDetail.json のパス
   secrets-manager:
     DOCKERHUB_USERNAME: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_USERNAME"
     DOCKERHUB_PASSWORD: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_PASSWORD"
@@ -21,7 +28,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t $ECR_REPOSITORY_URI:latest -f ./build/package/docker/Dockerfile --target deploy .
+      - docker build -t $ECR_REPOSITORY_URI:latest -f build/package/docker/Dockerfile --target deploy .
       - docker tag $ECR_REPOSITORY_URI:latest $ECR_REPOSITORY_URI:$IMAGE_TAG
 
   post_build:
@@ -30,7 +37,25 @@ phases:
       - echo Pushing the Docker image...
       - docker push $ECR_REPOSITORY_URI:latest
       - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+      - echo "Updating $APP_SPEC_PATH with:"
+      - echo "  TASK_DEFINITION_ARN: $TASK_DEFINITION_ARN"
+      - echo "  CONTAINER_NAME: $CONTAINER_NAME"
+      - echo "  CONTAINER_PORT: $CONTAINER_PORT"
+      # sed の区切り文字を @ に変更 (ARN や値に / が含まれる可能性があるため)
+      - sed -i -e "s@<TASK_DEFINITION_ARN>@${TASK_DEFINITION_ARN}@g" $APP_SPEC_PATH
+      - sed -i -e "s@<CONTAINER_NAME>@${CONTAINER_NAME}@g" $APP_SPEC_PATH
+      - sed -i -e "s@<CONTAINER_PORT>@${CONTAINER_PORT}@g" $APP_SPEC_PATH
+      - echo "Creating $IMAGE_DETAIL_FILE_PATH..."
+      # CONTAINER_NAME は appspec.yml で使用するものと同じである必要がある
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$ECR_REPOSITORY_URI:$IMAGE_TAG" > $IMAGE_DETAIL_FILE_PATH
 
 cache:
   paths:
-    - "/root/.m2/**/*"
+    - "/root/.m2/**/*" # 必要に応じてプロジェクトに合わせて変更 (例: Go の場合は /root/.cache/go-build や /go/pkg)
+
+artifacts:
+  files:
+    - 'appspec.yml'
+    - 'imageDetail.json'
+  base-directory: 'deployments/cicd' # このディレクトリ内のファイルがアーティファクトのルートに配置される
+  discard-paths: yes

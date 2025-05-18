@@ -1,0 +1,16 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "<TASK_DEFINITION_ARN>"
+        LoadBalancerInfo:
+          ContainerName: "<CONTAINER_NAME>"
+          ContainerPort: <CONTAINER_PORT>
+# Hooks:
+#  # Optional: Specify Lambda functions to run at different lifecycle events
+#  - BeforeInstall: "LambdaFunctionToRunBeforeInstall"
+#  - AfterInstall: "LambdaFunctionToRunAfterInstall"
+#  - AfterAllowTestTraffic: "LambdaFunctionToRunAfterAllowingTestTraffic"
+#  - BeforeAllowTraffic: "LambdaFunctionToRunBeforeAllowingProductionTraffic"
+#  - AfterAllowTraffic: "LambdaFunctionToRunAfterAllowingProductionTraffic"
