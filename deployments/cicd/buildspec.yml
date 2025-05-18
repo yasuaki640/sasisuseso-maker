@@ -4,8 +4,7 @@ env:
   variables:
     ECR_REPOSITORY: "sasisuseso-maker/api"
     CONTAINER_NAME: "sasisuseso-maker-api-container"
-    CONTAINER_PORT: 8080
-    TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-1:ACCOUNT_ID:task-definition/sasisuseso-maker-api-task:REVISION"
+    TASK_FAMILY: "sasisuseso-maker-api-task" # タスク定義ファミリー名
     APP_SPEC_PATH: "deployments/cicd/appspec.yml" # リポジトリルートからの appspec.yml のパス
     IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json" # リポジトリルートからの imageDetail.json のパス
   secrets-manager:
@@ -34,12 +33,21 @@ phases:
       - echo Pushing the Docker image...
       - docker push $ECR_REPOSITORY_URI:latest
       - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+
+      # $TASK_FAMILY の最新のタスク定義ARNを動的に取得
+      # 「これから作成されるリビジョン」が、このコマンド実行時点で最新のリビジョンであることを想定
+      - echo "Describing latest task definition for family $TASK_FAMILY..."
+      - LATEST_TASK_DEF_OUTPUT=$(aws ecs describe-task-definition --task-definition "$TASK_FAMILY" --query 'taskDefinition' --region "$AWS_REGION") # AWS_REGION は CodeBuild によって通常設定されます
+      - ACTUAL_TASK_DEFINITION_ARN=$(echo "$LATEST_TASK_DEF_OUTPUT" | jq -r '.taskDefinitionArn')
+      - echo "Using Task Definition ARN: $ACTUAL_TASK_DEFINITION_ARN"
+
       - 'echo "Updating $APP_SPEC_PATH with:"'
-      - 'echo "  TASK_DEFINITION_ARN: $TASK_DEFINITION_ARN"'
+      # 動的に取得したARNを使用
+      - 'echo "  TASK_DEFINITION_ARN: $ACTUAL_TASK_DEFINITION_ARN"'
       - 'echo "  CONTAINER_NAME: $CONTAINER_NAME"'
       - 'echo "  CONTAINER_PORT: $CONTAINER_PORT"'
       # sed の区切り文字を @ に変更 (ARN や値に / が含まれる可能性があるため)
-      - sed -i -e "s@<TASK_DEFINITION_ARN>@${TASK_DEFINITION_ARN}@g" $APP_SPEC_PATH
+      - sed -i -e "s@<TASK_DEFINITION_ARN>@${ACTUAL_TASK_DEFINITION_ARN}@g" $APP_SPEC_PATH
       - sed -i -e "s@<CONTAINER_NAME>@${CONTAINER_NAME}@g" $APP_SPEC_PATH
       - sed -i -e "s@<CONTAINER_PORT>@${CONTAINER_PORT}@g" $APP_SPEC_PATH
       - echo "Creating $IMAGE_DETAIL_FILE_PATH..."
