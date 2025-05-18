@@ -2,13 +2,10 @@ version: 0.2
 
 env:
   variables:
-    AWS_REGION: "ap-northeast-1"
     ECR_REPOSITORY: "sasisuseso-maker/api"
-    # CONTAINER_NAME, CONTAINER_PORT, TASK_DEFINITION_ARN は CodeBuild プロジェクトの環境変数として設定される想定
-    # 例:
-    # CONTAINER_NAME: "sasisuseso-maker-api-container" (Terraform の var.name_prefix + "-api-container")
-    # CONTAINER_PORT: 80 (Terraform の var.container_port)
-    # TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-1:ACCOUNT_ID:task-definition/sasisuseso-maker-api-task:REVISION"
+    CONTAINER_NAME: "sasisuseso-maker-api-container"
+    CONTAINER_PORT: 8080
+    TASK_DEFINITION_ARN: "arn:aws:ecs:ap-northeast-1:ACCOUNT_ID:task-definition/sasisuseso-maker-api-task:REVISION"
     APP_SPEC_PATH: "deployments/cicd/appspec.yml" # リポジトリルートからの appspec.yml のパス
     IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json" # リポジトリルートからの imageDetail.json のパス
   secrets-manager:
@@ -55,7 +52,7 @@ cache:
 
 artifacts:
   files:
-    - 'appspec.yml'
-    - 'imageDetail.json'
-  base-directory: 'deployments/cicd' # このディレクトリ内のファイルがアーティファクトのルートに配置される
+    - "appspec.yml"
+    - "imageDetail.json"
+  base-directory: "deployments/cicd" # このディレクトリ内のファイルがアーティファクトのルートに配置される
   discard-paths: yes
