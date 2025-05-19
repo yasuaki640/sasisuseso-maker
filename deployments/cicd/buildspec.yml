@@ -4,9 +4,9 @@ env:
   variables:
     ECR_REPOSITORY: "sasisuseso-maker/api"
     CONTAINER_NAME: "sasisuseso-maker-api-container"
-    TASK_FAMILY: "sasisuseso-maker-dev-api-task" # タスク定義ファミリー名
-    APP_SPEC_PATH: "deployments/cicd/appspec.yml" # リポジトリルートからの appspec.yml のパス
-    IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json" # リポジトリルートからの imageDetail.json のパス
+    TASK_FAMILY: "sasisuseso-maker-dev-api-task"
+    APP_SPEC_PATH: "deployments/cicd/appspec.yml"
+    IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json"
   secrets-manager:
     DOCKERHUB_USERNAME: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_USERNAME"
     DOCKERHUB_PASSWORD: "${DOCKERHUB_CREDENTIALS_SECRET_ARN}:DOCKERHUB_PASSWORD"
