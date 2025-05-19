@@ -4,7 +4,7 @@ env:
   variables:
     ECR_REPOSITORY: "sasisuseso-maker/api"
     CONTAINER_NAME: "sasisuseso-maker-api-container"
-    TASK_FAMILY: "sasisuseso-maker-api-task" # タスク定義ファミリー名
+    TASK_FAMILY: "sasisuseso-maker-dev-api-task" # タスク定義ファミリー名
     APP_SPEC_PATH: "deployments/cicd/appspec.yml" # リポジトリルートからの appspec.yml のパス
     IMAGE_DETAIL_FILE_PATH: "deployments/cicd/imageDetail.json" # リポジトリルートからの imageDetail.json のパス
   secrets-manager:
