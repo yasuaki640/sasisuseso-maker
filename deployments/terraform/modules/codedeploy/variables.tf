@@ -42,5 +42,5 @@ variable "green_target_group_name" {
 variable "termination_wait_time_in_minutes" {
   description = "The number of minutes to wait before terminating the blue instances after a successful deployment."
   type        = number
-  default     = 5
+  default     = 0
 }
